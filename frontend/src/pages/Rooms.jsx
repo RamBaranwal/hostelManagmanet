@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
 const API_URL = `http://${window.location.hostname}:5000/api/rooms`;
 
@@ -9,6 +9,7 @@ const Rooms = () => {
   const [loading, setLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
+  const [editingRoom, setEditingRoom] = useState(null);
   const [formData, setFormData] = useState({ roomNumber: '', capacity: 2 });
 
   useEffect(() => {
@@ -33,12 +34,34 @@ const Rooms = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(API_URL, formData);
-      setRooms([...rooms, response.data]);
+      if (editingRoom) {
+        const response = await axios.put(`${API_URL}/${editingRoom._id}`, formData);
+        setRooms(rooms.map(r => r._id === editingRoom._id ? response.data : r));
+      } else {
+        const response = await axios.post(API_URL, formData);
+        setRooms([...rooms, response.data]);
+      }
       setShowModal(false);
+      setEditingRoom(null);
       setFormData({ roomNumber: '', capacity: 2 });
     } catch (error) {
-      console.error('Error adding room:', error);
+      alert(error.response?.data?.message || 'Error saving room');
+    }
+  };
+
+  const handleEditClick = (room) => {
+    setEditingRoom(room);
+    setFormData({ roomNumber: room.roomNumber, capacity: room.capacity });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (roomId) => {
+    if (!window.confirm("Are you sure you want to delete this room?")) return;
+    try {
+      await axios.delete(`${API_URL}/${roomId}`);
+      setRooms(rooms.filter(r => r._id !== roomId));
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error deleting room');
     }
   };
 
@@ -83,7 +106,7 @@ const Rooms = () => {
           <h1>Rooms Management</h1>
           <p>Monitor room availability and status</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn btn-primary" onClick={() => { setEditingRoom(null); setFormData({ roomNumber: '', capacity: 2 }); setShowModal(true); }}>
           <Plus size={18} /> Add Room
         </button>
       </div>
@@ -99,7 +122,15 @@ const Rooms = () => {
             return (
               <div key={room._id} className="glass-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Room {room.roomNumber}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Room {room.roomNumber}</h3>
+                    <button className="btn" style={{ padding: '0.2rem', background: 'transparent', color: 'var(--text-secondary)' }} onClick={() => handleEditClick(room)} title="Edit Room">
+                      <Edit2 size={16} />
+                    </button>
+                    <button className="btn" style={{ padding: '0.2rem', background: 'transparent', color: 'var(--danger-color)' }} onClick={() => handleDelete(room._id)} title="Delete Room">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                   {getStatusBadge(room.status)}
                 </div>
                 <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -136,7 +167,7 @@ const Rooms = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
           <div className="glass-card" style={{ width: '100%', maxWidth: '400px' }}>
-            <h2 style={{ marginBottom: '1.5rem' }}>Add New Room</h2>
+            <h2 style={{ marginBottom: '1.5rem' }}>{editingRoom ? 'Edit Room' : 'Add New Room'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Room Number</label>
@@ -147,7 +178,7 @@ const Rooms = () => {
                 <input type="number" name="capacity" className="form-control" min="1" max="10" value={formData.capacity} onChange={handleInputChange} required />
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
-                <button type="button" className="btn" style={{ background: 'transparent', color: 'var(--text-secondary)' }} onClick={() => setShowModal(false)}>
+                <button type="button" className="btn" style={{ background: 'transparent', color: 'var(--text-secondary)' }} onClick={() => { setShowModal(false); setEditingRoom(null); setFormData({ roomNumber: '', capacity: 2 }); }}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
