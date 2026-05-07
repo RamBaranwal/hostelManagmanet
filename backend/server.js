@@ -17,6 +17,9 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('Hostel Management API is running perfectly!');
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/students', authMiddleware, studentRoutes);
 app.use('/api/rooms', authMiddleware, roomRoutes);
