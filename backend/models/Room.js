@@ -1,0 +1,10 @@
+const mongoose = require('mongoose');
+
+const roomSchema = new mongoose.Schema({
+  roomNumber: { type: String, required: true, unique: true },
+  capacity: { type: Number, required: true, default: 2 },
+  occupants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
+  status: { type: String, enum: ['Available', 'Full', 'Maintenance'], default: 'Available' }
+});
+
+module.exports = mongoose.model('Room', roomSchema);
