@@ -1,0 +1,29 @@
+name: deploy to ec2
+on:
+    workflow_run:
+        workflows: ["Docker Image CI"]
+        types:
+            - completed
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: deploy to ec2
+              uses: appleboy/ssh-action@v0.1.5
+              with:
+                  host: ${{secrets.EC2_HOST}}
+                  username: ${{secrets.EC2_USERNAME}}
+                  key: ${{secrets.EC2_KEY}}
+                  script: |
+                    docker pull rambaranwal/hostel-backend:latest
+                    docker pull rambaranwal/hostel-frontend:latest
+                    
+                    docker rm -f hostel-frontend || true
+                    docker rm -f hostel-backend || true
+                    
+                    # Run backend on port 5000 and inject secure environment variables
+                    docker run -d --name hostel-backend -p 5000:5000 -e PORT=5000 -e MONGO_URI='${{secrets.MONGO_URI}}' -e JWT_SECRET='${{secrets.JWT_SECRET}}' rambaranwal/hostel-backend:latest
+                    
+                    # Run frontend on port 80
+                    docker run -d --name hostel-frontend -p 80:80 --link hostel-backend rambaranwal/hostel-frontend:latest
