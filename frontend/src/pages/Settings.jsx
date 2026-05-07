@@ -15,7 +15,7 @@ const Settings = () => {
     }
     
     try {
-      const response = await axios.put('http://localhost:5000/api/auth/update-password', {
+      const response = await axios.put(`http://${window.location.hostname}:5000/api/auth/update-password`, {
         currentPassword: password.current,
         newPassword: password.new
       });

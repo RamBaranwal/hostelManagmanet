@@ -16,9 +16,9 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [studentsRes, roomsRes, activitiesRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/students'),
-          axios.get('http://localhost:5000/api/rooms'),
-          axios.get('http://localhost:5000/api/activities')
+          axios.get(`http://${window.location.hostname}:5000/api/students`),
+          axios.get(`http://${window.location.hostname}:5000/api/rooms`),
+          axios.get(`http://${window.location.hostname}:5000/api/activities`)
         ]);
         
         const students = studentsRes.data;

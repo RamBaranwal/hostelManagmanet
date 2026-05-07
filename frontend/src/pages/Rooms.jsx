@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/rooms';
+const API_URL = `http://${window.location.hostname}:5000/api/rooms`;
 
 const Rooms = () => {
   const [rooms, setRooms] = useState([]);

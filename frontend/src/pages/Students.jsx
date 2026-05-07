@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Search, Trash2, Edit2 } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/students';
+const API_URL = `http://${window.location.hostname}:5000/api/students`;
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -24,7 +24,7 @@ const Students = () => {
     try {
       const [studentsRes, roomsRes] = await Promise.all([
         axios.get(API_URL),
-        axios.get('http://localhost:5000/api/rooms')
+        axios.get(`http://${window.location.hostname}:5000/api/rooms`)
       ]);
       setStudents(studentsRes.data);
       // Only keep rooms that have space and are not in maintenance

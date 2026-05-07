@@ -16,8 +16,8 @@ const Attendance = () => {
     setLoading(true);
     try {
       const [studentsRes, attendanceRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/students'),
-        axios.get(`http://localhost:5000/api/attendance/${date}`)
+        axios.get(`http://${window.location.hostname}:5000/api/students`),
+        axios.get(`http://${window.location.hostname}:5000/api/attendance/${date}`)
       ]);
       
       const sortedStudents = studentsRes.data.sort((a, b) => {
@@ -43,7 +43,7 @@ const Attendance = () => {
 
   const markAttendance = async (studentId, status) => {
     try {
-      await axios.post('http://localhost:5000/api/attendance', {
+      await axios.post(`http://${window.location.hostname}:5000/api/attendance`, {
         date,
         studentId,
         status
